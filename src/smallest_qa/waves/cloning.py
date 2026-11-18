@@ -11,6 +11,8 @@ from pathlib import Path
 from smallest_qa.utils import evidence
 from smallest_qa.utils.http import USE_KEY, Exchange, request
 
+UPLOAD_TYPES = {".wav": "audio/wav", ".mp3": "audio/mpeg", ".mp4": "video/mp4", ".webm": "audio/webm"}
+
 
 def create(sample: Path | None, *, name: str, mime: str | None = None, auth=USE_KEY, **fields) -> Exchange:
     """Always multipart, even with no file part, so the 'missing file' case is tested the way a form sends it."""
@@ -18,7 +20,9 @@ def create(sample: Path | None, *, name: str, mime: str | None = None, auth=USE_
     files = {k: (None, str(v)) for k, v in form.items()}
     if sample is not None:
         sample = Path(sample)
-        mime = mime or mimetypes.guess_type(sample.name)[0] or "application/octet-stream"
+        # the server accepts WAV only when labelled audio/wav or audio/wave (finding C2), so don't trust mimetypes
+        mime = mime or UPLOAD_TYPES.get(sample.suffix.lower()) or mimetypes.guess_type(sample.name)[0] \
+            or "application/octet-stream"
         files["file"] = (sample.name, sample.read_bytes(), mime)
     evidence.log(label=f"clone-create:{name}:upload", fields=form, file=sample.name if sample else None,
                  file_bytes=sample.stat().st_size if sample else None, mime=mime)
