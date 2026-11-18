@@ -60,3 +60,11 @@ def test_in_flight_guard_refuses_past_limit():
     finally:
         for _ in held:
             http._slots.release()
+
+
+def test_mp3_info_reads_frame_header_after_id3():
+    # ID3v2 tag (10-byte header, 0 body) then an MPEG-2 layer III frame: 24000 Hz, 64 kbps, mono
+    frame = bytes([0xFF, 0xF3, (8 << 4) | (1 << 2), 0xC0]) + b"\x00" * 188
+    info = audio.mp3_info(b"ID3\x04\x00\x00\x00\x00\x00\x00" + frame)
+    assert info["sample_rate"] == 24000 and info["bitrate_kbps"] == 64 and info["channels"] == 1
+    assert audio.duration(b"\x00\x00" * 24000, 24000) == 1.0  # headerless -> 16-bit mono PCM
