@@ -111,7 +111,7 @@ class LiveSocket:
         return True
 
     def summary(self) -> dict:
-        return {"sent": self.sent[:40], "frames": self.frames[:120], "n_frames": len(self.frames),
+        return {"sent": self.sent[:400], "frames": self.frames[:3000], "n_frames": len(self.frames),
                 "audio_bytes": {k: len(v) for k, v in self.audio.items()}, "close_code": self.close_code,
                 "close_reason": self.close_reason, "closed_at_ms": self.closed_at}
 
