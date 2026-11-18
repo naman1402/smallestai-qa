@@ -1,0 +1,41 @@
+[project]
+name = "smallest-qa"
+version = "0.1.0"
+description = "Engineering QA harness for the Smallest AI Models API (Lightning TTS, voice cloning)"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.32",
+    "websockets>=14",
+    "python-dotenv>=1.0",
+    "smallestai==5.14.0", # pinned: SDK findings refer to this exact version
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-repeat>=0.9", "ruff>=0.6"]
+
+[project.scripts]
+sqa = "smallest_qa.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/smallest_qa"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "live: calls the real API (auto-applied outside tests/unit; skipped without SMALLEST_API_KEY)",
+    "clone: needs your own voice recording (--sample / QA_SAMPLE)",
+    "slow: waits on server timeouts (60-180 s)",
+    "costly: spends noticeably more credits than a short phrase",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

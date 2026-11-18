@@ -1,0 +1,22 @@
+# python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# secrets
+.env
+
+# local audio: your voice recordings and generated speech stay off git
+samples/*
+!samples/.gitkeep
+out/
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/
