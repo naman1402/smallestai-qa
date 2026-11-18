@@ -38,6 +38,8 @@ class SSEResult:
     audio: bytes = b""
     raw_lines: list = field(default_factory=list)  # lines that are neither event: nor data:
     error_body: str | None = None
+    audio_events: list = field(default_factory=list)  # (ms since request, audio bytes) per audio event
+    stopped_early: bool = False
 
     @property
     def request_id(self):
@@ -48,7 +50,9 @@ class SSEResult:
         return next((f for f in self.frames if f.get("done") is True), None)
 
 
-def synthesize_sse(body: dict | None = None, *, auth=USE_KEY, label: str = "tts-sse") -> SSEResult:
+def synthesize_sse(body: dict | None = None, *, auth=USE_KEY, label: str = "tts-sse",
+                   stop_after: int | None = None) -> SSEResult:
+    """POST /tts/live as SSE. `stop_after=N` closes the stream after N audio events (a client that goes away)."""
     payload = tts_body(output_format="pcm") if body is None else body
     t0 = time.perf_counter()
     with in_flight():
@@ -70,7 +74,13 @@ def synthesize_sse(body: dict | None = None, *, auth=USE_KEY, label: str = "tts-
                         if res.first_audio_ms is None:
                             res.first_audio_ms = t
                             res.frames.append({"t_ms": t, **frame, "audio": "<base64>"})
-                        res.audio += base64.b64decode(frame["audio"])
+                        pcm = base64.b64decode(frame["audio"])
+                        res.audio += pcm
+                        res.audio_events.append((t, len(pcm)))
+                        if stop_after and len(res.audio_events) >= stop_after:
+                            res.stopped_early = True
+                            r.close()
+                            break
                     else:
                         res.frames.append({"t_ms": t, **frame})
                 else:
@@ -80,7 +90,7 @@ def synthesize_sse(body: dict | None = None, *, auth=USE_KEY, label: str = "tts-
                  status=res.status, headers=evidence.header_dict(r.headers.items()), headers_ms=res.headers_ms,
                  first_audio_ms=res.first_audio_ms, total_ms=res.total_ms, events=res.events,
                  frames=res.frames[:20], audio_bytes=len(res.audio), raw_lines=res.raw_lines[:10],
-                 error_body=res.error_body)
+                 error_body=res.error_body, audio_events=res.audio_events[:200], stopped_early=res.stopped_early)
     return res
 
 
