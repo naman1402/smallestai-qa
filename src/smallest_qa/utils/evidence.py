@@ -16,6 +16,7 @@ from smallest_qa.config import settings
 IST = dt.timezone(dt.timedelta(hours=5, minutes=30))
 RUN_ID = uuid.uuid4().hex[:8]  # one per process: groups a pytest session or CLI call
 _SECRET = re.compile(r"\b(sk|wat|wct)_[A-Za-z0-9_\-]+")
+_ACCOUNT_ID = re.compile(r'("organizationId": ?)"[^"]*"')  # account identifier in API bodies
 _lock = threading.Lock()
 _current_test = "manual"  # set by the pytest fixture; a plain global so worker threads see it
 
@@ -28,6 +29,7 @@ def set_test(name: str) -> None:
 def redact(text: str) -> str:
     if settings.api_key:
         text = text.replace(settings.api_key, "sk_...")
+    text = _ACCOUNT_ID.sub(r'\1"<redacted>"', text)
     return _SECRET.sub(lambda m: m.group(1) + "_...", text)
 
 
