@@ -6,7 +6,7 @@ installed 2026-11-18) against docs/reference/smallest-docs-2026-11-18/. Each tes
 API reference; a failure means the skill is right and the reference is wrong (still a finding).
 
 Skill claims checked elsewhere: "Pro is English+Hindi only" (test_voices languages) and
-"cloning is lightning_v3.1 only, not Pro" (tests/cloning pro pool). Findings log: docs/findings.md section 1.
+"cloning is lightning_v3.1 only, not Pro" (tests/cloning pro pool). Findings: evidence/2026-11-18-tts-findings.md (F3).
 """
 
 import pytest
