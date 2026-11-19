@@ -35,7 +35,7 @@ Anything less is an **observation**, reported with its measured rate.
 | **F2** | Medium | 4 voices in the Pro model card don't exist in the API | every run | [tts](2026-11-18-tts-findings.md#f2-4-voices-in-the-pro-model-card-dont-exist-in-the-api) |
 | **F3** | Medium | Smallest's own agent skill contradicts the API in 4 places | every run | [tts](2026-11-18-tts-findings.md#f3-smallests-official-agent-skill-contradicts-the-api-in-4-places) |
 | **R5** | Low | `complete` arrives ~4 s after the last audio, so "agent finished speaking" can't be detected from it. Engine-wide | every run | [reproducibility](2026-11-18-reproducibility.md), [e2e](2026-11-19-e2e-runs.md) |
-| **E1** | Low | The WebSocket ignores `output_format: "ulaw"` and silently returns PCM (REST serves ulaw) | every run | [e2e](2026-11-19-e2e-runs.md#new-from-the-prototype) |
+| **E1** | Low | The WebSocket ignores `output_format: "ulaw"` and silently returns PCM (REST serves ulaw) | 4/4 runs with a phone leg | [e2e](2026-11-19-e2e-runs.md#new-from-the-prototype) |
 | E2 | Observation | Hindi first audio ~500 ms vs ~250 ms in English; response latency over the 1.5 s budget | 2/2 Hindi runs | [e2e](2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) |
 | E3 | Observation | Clone speaking Hindi: runaway generation (128 s of audio for a 76-character sentence), garbled numbers | 1/3 Hindi runs | [e2e](2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) |
 | R6 | Observation | A WebSocket stream stalls ~0.5 s right after its first chunks | 4/67 turns pooled | [realtime](2026-11-18-realtime-findings.md), [e2e](2026-11-19-e2e-runs.md) |

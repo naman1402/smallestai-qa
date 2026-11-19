@@ -57,7 +57,7 @@ The clone is still listed as `completed` afterwards. The delete route sits under
 | `DELETE /waves/v1/lightning-large {"voiceId": "voice_s7UVkBADFy"}` | **410 `MODEL_DEPRECATED`** | `464b6f67-a21e-4365-8731-4092f8d8689e` |
 | List clones after both deletes | both still listed, `completed` | `f53b07d9-3d7f-4a3b-918f-954eceaa3b75` |
 | Owner deletes `voice_s7UVkBADFy` in the dashboard, then list | only `voice_slCdbOl2b2` left | `0e268536-7d2c-438d-822d-f52c3acd930f` |
-| Re-check with the doc's exact curl (`voice_slCdbOl2b2`) | **410 `MODEL_DEPRECATED`** | `23be11a1-a127-465c-a49c-c545dd1fa2ce` |
+| Re-check with the doc's exact curl (`voice_slCdbOl2b2`) | **410 `MODEL_DEPRECATED`** | `23be11a1-a127-465c-a49c-c545dd1fa2ce` (plain curl, outside the harness, so not in the raw log) |
 
 **Expected:** a working, documented delete in the API reference and SDK, for example `DELETE /waves/v1/voice-cloning/{voiceId}`. Retiring a model should not take clone management down with it.
 

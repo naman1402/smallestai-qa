@@ -20,7 +20,7 @@
 | **F2** | 4 voices in the Pro model card (`ines`, `paula`, `sebastian`, `sara`) don't exist in the API | Medium | 3/3 | the same 4 of 208 missing every run |
 | **F3** | Smallest's agent skill contradicts the API in 4 places; the API follows its reference | Medium | 3/3 | all `test_skill_claims` pass every run; mismatched voice gets 400: `5d0fe9f7-…`, `f932d677-…`, `6aa0048c-…` |
 
-Also permanent, but parked as lower value and not in the report: R3 (idle-timeout close has no close frame, 1006), R4 (the socket stays open after `complete`, contrary to the docs), and R5 (`complete` arrives 3.9–4.1 s after the last chunk on every turn; 9/9 turns), plus finding 3.3 (one-shot `complete` wait about 3.9–4.0 s).
+Also permanent, but parked as lower value and not in the report: R3 (idle-timeout close has no close frame, 1006), R4 (the socket stays open after `complete`, contrary to the docs), and finding 3.3 (one-shot `complete` wait about 3.9–4.0 s). R5 (`complete` arrives 3.9–4.1 s after the last chunk on every turn; 9/9 turns) was parked here, then **promoted to a Low finding** after the e2e prototype showed it adds about 4 s per turn to an agent built from the docs' samples, on stock voices too ([e2e](2026-11-19-e2e-runs.md)).
 
 ## Intermittent: real, but not every run (report as observations with their rate)
 
