@@ -24,7 +24,7 @@ build-backend = "hatchling.build"
 packages = ["src/smallest_qa"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests/unit"]  # live suites spend credits: run them by path
 addopts = "-ra --strict-markers"
 markers = [
     "live: calls the real API (auto-applied outside tests/unit; skipped without SMALLEST_API_KEY)",
