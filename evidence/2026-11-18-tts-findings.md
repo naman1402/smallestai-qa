@@ -5,7 +5,7 @@
 - **Docs compared against:** `docs/reference/smallest-docs-2026-11-18/` (snapshot taken the same day).
 - **Skill compared against:** `.agents/skills/text-to-speech` from `smallest-inc/skills`, installed 2026-11-18.
 - **Reproducibility:** re-run 3 times at 19:00–19:20 IST; see `2026-11-18-reproducibility.md`.
-- **Severity scale:** High = silent wrong behavior in production. Medium = docs or skill steer an integration wrong. Low = cosmetic.
+- **Severity scale:** High = silent wrong behavior in production. Medium = docs or skill steer an integration wrong. Low = an easy workaround exists (same scale as `QA_REPORT.md`).
 
 | ID | Finding | Severity | Status |
 |---|---|---|---|
@@ -99,7 +99,7 @@ Test: `tests/tts/test_voices.py::test_documented_pro_voices_exist_with_their_lan
 
 ---
 
-## Also observed (as documented)
+## R5: `complete` arrives about 4 s after the last audio
 Every one-shot WebSocket request sends `complete` **3988 ms** after its last audio chunk (default `complete_backoff_ms` is 4000). With `complete_backoff_ms: 0` the gap is 0.1 ms. Every doc sample waits for `complete`, so a voice agent built from them adds about 4 s per turn: `e32e77b9-41cb-4664-8cee-4b3e93b35043` vs `8c990a3a-0c5a-4687-b09b-3a079043546a`.
 
 ## Checked and working as documented

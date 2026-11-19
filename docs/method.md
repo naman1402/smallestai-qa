@@ -98,7 +98,7 @@ The verdict is one of:
 
 - **Atoms:** out of scope.
 - **Load testing and security probing:** forbidden by the brief.
-- **The Python SDK:** the raw API is the contract.
+- **The Python SDK:** the raw API is the contract. The SDK (5.14.0, pinned in `pyproject.toml`) was only searched for a clone delete method (C1).
 - **Real telephony:** no phone number was rented; the phone leg was simulated.
 - **Voice quality as such:** that's ML, not engineering.
 - **More than 4 concurrent requests:** the brief caps requests at about 5.

@@ -5,7 +5,6 @@
 | **Scope** | Lightning TTS (REST, SSE, WebSocket), instant voice cloning, and Pulse STT where it supports them: the core of any voice agent built on Smallest. Atoms is out of scope |
 | **Method** | Feature conformance → realtime reliability → an end-to-end prototype (a branded voice support agent, scored go/no-go). Each stage was run once, then re-run 3 times. The prototype ran 7 scored times in 3 variations. See [docs/method.md](docs/method.md) and [docs/runs.md](docs/runs.md) |
 | **Evidence** | [evidence/README.md](evidence/README.md) has the full trail for each finding: note, request ids, raw log. Times are IST (UTC+5:30), dates 2026-11-18/19 |
-| **Time spent** | About 16–20 hours |
 
 ## Verdict
 
@@ -43,7 +42,7 @@ Commands assume `make setup` and a key in `.env`. Cost and clone rules: [AGENTS.
 ### R1 · High · Barge-in can't stop speech that's already released
 - **Expected → observed:** `cancel_request` should stop the context's speech → it drops only text the server hasn't started on. Audio already released keeps streaming, and no frame acknowledges the cut.
 - **Customer impact:** the agent talks over a caller who interrupted it. SLO: talk-over under 0.3 s.
-- **Runs:** 4/4 reliability sessions (11.8–14.7 s streamed after the cancel). 4/4 English e2e runs on a clone and on a stock voice (0.8–3.4 s), so it's engine-wide. Hindi: 5.6 s in one run and 0.16 s in the other (one barge-in each).
+- **Runs:** 4/4 reliability sessions, 5 barge-in runs (11.8–14.7 s streamed after the cancel). 4/4 English e2e runs on a clone and on a stock voice (0.8–3.4 s), so it's engine-wide. Hindi: 5.6 s in one run and 0.16 s in the other (one barge-in each).
 - **Evidence:** `7117cfcf-c16c-49e9-acc3-3ec156e3e6ae` (11-18 18:33), `3b778853-4b6b-4328-97ab-e80f2a1a53ea` (e2e, 11-19 02:20) · [realtime note](evidence/2026-11-18-realtime-findings.md#r1-barge-in-cant-stop-speech-that-is-already-released) · `QA_MAX_IN_FLIGHT=4 .venv/bin/pytest tests/reliability/test_agent_turns.py -k barge_in -v`
 
 ### F1 · High · Unknown pronunciation dictionary ids are silently accepted
@@ -92,7 +91,7 @@ Commands assume `make setup` and a key in `.env`. Cost and clone rules: [AGENTS.
 - **Expected → observed:** `complete` should mark the end of speech → it arrives 3.5–4.1 s after the last audio (the default `complete_backoff_ms` is 4000). With `complete_backoff_ms: 0` the gap is 0.1 ms.
 - **Customer impact:** every docs sample waits for `complete`, so an agent built from them adds about 4 s per turn. SLO: under 1 s. Workaround: lower the backoff, or detect silence.
 - **Runs:** 4/4 sessions; every e2e turn on a clone and on a stock voice, so it's engine-wide.
-- **Evidence:** `e32e77b9-41cb-4664-8cee-4b3e93b35043` (default) vs `8c990a3a-0c5a-4687-b09b-3a079043546a` (backoff 0), both 11-18 16:12 · [tts note](evidence/2026-11-18-tts-findings.md#also-observed-as-documented) · `.venv/bin/pytest tests/tts/test_websocket.py -k complete_backoff -v`
+- **Evidence:** `e32e77b9-41cb-4664-8cee-4b3e93b35043` (default) vs `8c990a3a-0c5a-4687-b09b-3a079043546a` (backoff 0), both 11-18 16:12 · [tts note](evidence/2026-11-18-tts-findings.md#r5-complete-arrives-about-4-s-after-the-last-audio) · `.venv/bin/pytest tests/tts/test_websocket.py -k complete_backoff -v`
 
 ### E1 · Low · The WebSocket ignores `output_format: "ulaw"`
 - **Expected → observed:** μ-law (as REST serves it) → 16-bit PCM with no error. The μ-law/PCM byte ratio was 0.94–1.07, where μ-law would be about 0.5.
@@ -106,9 +105,9 @@ These are real but intermittent, so they're reported with the measured rate.
 
 | ID | What | Rate | Evidence |
 |---|---|---|---|
-| E3 | A clone speaking Hindi ran away: 128 s of audio for a 76-character sentence, with garbled numbers | 1 of 3 Hindi runs | [e2e](evidence/2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) · `68519717-c779-412b-b76a-dc309d69a175` (11-19 04:03) |
+| E3 | A clone speaking Hindi ran away: 128 s of audio for a 76-character sentence, with garbled numbers | 1 of 3 Hindi runs (the one that was stopped early, unscored) | [e2e](evidence/2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) · `68519717-c779-412b-b76a-dc309d69a175` (11-19 04:03) |
 | E2 | Hindi first audio took about 500 ms (English about 250 ms), so response latency went over 1.5 s. Only 6 turns were measured | 2 of 2 Hindi runs | same |
-| R6 | A WebSocket stream stalls 0.5–7 s right after its first chunk | 4 of 67 (2/40 reliability streams, 2/27 e2e clone turns); 0 of 23 turns in the stock-voice e2e run | [realtime](evidence/2026-11-18-realtime-findings.md#r6-observation-not-reproduced-in-re-runs-a-websocket-stream-sometimes-stalls-right-after-its-first-chunks), [e2e](evidence/2026-11-19-e2e-runs.md#new-from-the-prototype) |
+| R6 | A WebSocket stream stalls 0.5–7 s right after its first chunk | 2 of 22 WebSocket streams (reliability); 2 of 42 e2e turns on a clone; 0 of 23 on a stock voice | [realtime](evidence/2026-11-18-realtime-findings.md#r6-observation-not-reproduced-in-re-runs-a-websocket-stream-sometimes-stalls-right-after-its-first-chunks), [e2e](evidence/2026-11-19-e2e-runs.md#new-from-the-prototype) |
 | C3 | A Pro clone adds a stray opening syllable when the sample starts with silence | 2 of 4 clones | [cloning](evidence/2026-11-18-cloning-findings.md#c3-pro-clones-add-a-stray-sound-at-the-start-when-the-sample-starts-with-silence) |
 | C4 | A cross-lingual Pro clone (Japanese) is sometimes unintelligible, yet still returns 200 | 4 of 18 clips | [cloning](evidence/2026-11-18-cloning-findings.md#c4-observation-cross-lingual-pro-clone-sometimes-returns-unintelligible-audio-with-a-200) |
 

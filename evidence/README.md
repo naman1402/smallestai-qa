@@ -38,7 +38,7 @@ Anything less is an **observation**, reported with its measured rate.
 | **E1** | Low | The WebSocket ignores `output_format: "ulaw"` and silently returns PCM (REST serves ulaw) | 4/4 runs with a phone leg | [e2e](2026-11-19-e2e-runs.md#new-from-the-prototype) |
 | E2 | Observation | Hindi first audio ~500 ms vs ~250 ms in English; response latency over the 1.5 s budget | 2/2 Hindi runs | [e2e](2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) |
 | E3 | Observation | Clone speaking Hindi: runaway generation (128 s of audio for a 76-character sentence), garbled numbers | 1/3 Hindi runs | [e2e](2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) |
-| R6 | Observation | A WebSocket stream stalls ~0.5 s right after its first chunks | 4/67 turns pooled | [realtime](2026-11-18-realtime-findings.md), [e2e](2026-11-19-e2e-runs.md) |
+| R6 | Observation | A WebSocket stream stalls 0.5–7 s right after its first chunks | 2/22 reliability streams; 2/42 e2e clone turns; 0/23 stock-voice turns | [realtime](2026-11-18-realtime-findings.md), [e2e](2026-11-19-e2e-runs.md) |
 | C3 | Observation | Pro clone adds a stray sound at the start (sample begins with silence) | 2/4 clones | [cloning](2026-11-18-cloning-findings.md#c3-pro-clones-add-a-stray-sound-at-the-start-when-the-sample-starts-with-silence) |
 | C4 | Observation | Cross-lingual Pro clone (Japanese) sometimes unintelligible, with a 200 | 4/18 clips | [cloning](2026-11-18-cloning-findings.md#c4-observation-cross-lingual-pro-clone-sometimes-returns-unintelligible-audio-with-a-200) |
 
