@@ -1,0 +1,61 @@
+{
+  "version": 2,
+  "skills": {
+    "api-testing": {
+      "source": "petrkindlmann/qa-skills",
+      "commit": "5087a3461d49da76b1e794d9b0bfbd23f38dc75b",
+      "sourceType": "github",
+      "skillPath": "skills/api-testing/SKILL.md",
+      "computedHash": "346aa121b33b19baf2503bd87f898f721065dccda32cf1d26eb07e7ad49198ef"
+    },
+    "exploratory-testing": {
+      "source": "petrkindlmann/qa-skills",
+      "commit": "5087a3461d49da76b1e794d9b0bfbd23f38dc75b",
+      "sourceType": "github",
+      "skillPath": "skills/exploratory-testing/SKILL.md",
+      "computedHash": "6eaa7e1d326161ce09b394391295652c36bc229d658a352b2e90f903d583a8bc"
+    },
+    "qa-report-humanizer": {
+      "source": "petrkindlmann/qa-skills",
+      "commit": "5087a3461d49da76b1e794d9b0bfbd23f38dc75b",
+      "sourceType": "github",
+      "skillPath": "skills/qa-report-humanizer/SKILL.md",
+      "computedHash": "9581247e95cd6396fdea1d85cb9530fdff42ceb874265a2d3f029d5ffca9a5c7"
+    },
+    "risk-based-testing": {
+      "source": "petrkindlmann/qa-skills",
+      "commit": "5087a3461d49da76b1e794d9b0bfbd23f38dc75b",
+      "sourceType": "github",
+      "skillPath": "skills/risk-based-testing/SKILL.md",
+      "computedHash": "3a6fe7197cffd1eff7f499e3188eef86a2890d6883736eeb14a1db9491475036"
+    },
+    "setup-api-key": {
+      "source": "smallest-inc/skills",
+      "commit": "0b43dcd1c01e3e132cafd2b8538c4e8f8799a51d",
+      "sourceType": "github",
+      "skillPath": "setup-api-key/SKILL.md",
+      "computedHash": "f5746840374eaa06e87f5bdb330a6b3a45c8f58dcc2e3b430593cbfd18d3911a"
+    },
+    "speech-to-text": {
+      "source": "smallest-inc/skills",
+      "commit": "0b43dcd1c01e3e132cafd2b8538c4e8f8799a51d",
+      "sourceType": "github",
+      "skillPath": "speech-to-text/SKILL.md",
+      "computedHash": "4548b24472026a253f961962fa5ed6939627c31c862f08be6d63e657cb87a627"
+    },
+    "text-to-speech": {
+      "source": "smallest-inc/skills",
+      "commit": "0b43dcd1c01e3e132cafd2b8538c4e8f8799a51d",
+      "sourceType": "github",
+      "skillPath": "text-to-speech/SKILL.md",
+      "computedHash": "f5e4e41d1bef7aac4e3438d9e29a00e64893df3849ebfb3ed35b540ee364ae44"
+    },
+    "websocket-realtime-testing": {
+      "source": "mejbaurbahar/software-tester-skills",
+      "commit": "e3ee5dba8ca7cc1aef7bd4ed38e60b374b831002",
+      "sourceType": "github",
+      "skillPath": "skills/websocket-realtime-testing/SKILL.md",
+      "computedHash": "4a8bc3ab6f40d595c107217f59e82b42a41326794bff0e67599d8916331dd6b3"
+    }
+  }
+}
