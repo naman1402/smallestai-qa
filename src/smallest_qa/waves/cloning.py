@@ -20,7 +20,7 @@ def create(sample: Path | None, *, name: str, mime: str | None = None, auth=USE_
     files = {k: (None, str(v)) for k, v in form.items()}
     if sample is not None:
         sample = Path(sample)
-        # the server accepts WAV only when labelled audio/wav or audio/wave (finding C2), so don't trust mimetypes
+        # the reference's MIME list allows only audio/wav or audio/wave for WAV, so don't trust mimetypes
         mime = mime or UPLOAD_TYPES.get(sample.suffix.lower()) or mimetypes.guess_type(sample.name)[0] \
             or "application/octet-stream"
         files["file"] = (sample.name, sample.read_bytes(), mime)

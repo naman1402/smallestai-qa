@@ -1,8 +1,9 @@
-"""Clone upload: POST /waves/v1/voice-cloning accepts a valid WAV whatever MIME label the client sends.
+"""Clone upload: which MIME labels POST /waves/v1/voice-cloning accepts for the same valid WAV.
 
-Contract: docs/reference/smallest-docs-2026-11-18/models__voice-cloning__instant-clone-api.md
-  "Supported types: .mp3, .wav, .mp4, .webm" (file types, no MIME list). Evidence: finding C2 in
-  evidence/2026-11-18-cloning-findings.md.
+The cloning guide says "Supported types: .mp3, .wav, .mp4, .webm"; the API reference
+(api-reference__models__text-to-speech__create-voice-clone.md, line 30) lists the MIME types: audio/wav and
+audio/wave for WAV. Other labels failing therefore matches the reference (C2 was withdrawn for that reason; see
+evidence/2026-11-18-cloning-findings.md). The tests assert the guide's looser wording, so those cases fail.
 """
 
 import pytest

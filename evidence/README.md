@@ -8,14 +8,17 @@ All runs were against `https://api.smallest.ai` / `wss://api.smallest.ai` from o
 
 ## Summary
 
-- **10 findings reproduced in every run.**
+- **7 findings reproduced in every run.**
   - High: 3 (R1, F1, C1)
-  - Medium: 5 (R2, C2, C5, F2, F3)
-  - Low: 2 (R5, E1)
+  - Medium: 4 (E1, R2, F2, F3)
+- **3 withdrawn on 2026-11-21** after re-checking the docs, because the docs describe the behaviour: R5 (the 4 s
+  `complete` delay is the documented `complete_backoff_ms` default), C2 (the rejected MIME labels aren't on the
+  reference's list) and C5 (the docs promise no 400 for a clone on the other pool). Their notes are kept, marked
+  withdrawn.
 - **5 observations** are intermittent and reported with their rates: E3, E2, R6, C3, C4.
 - **The end-to-end prototype** was a branded voice support agent. Its verdict was **GO WITH WORKAROUNDS** in all
   7 scored runs (83–91%).
-- **The stock-voice control showed R1 and R5 are engine-wide.** They aren't specific to cloned voices.
+- **The stock-voice control showed R1 is engine-wide.** It isn't specific to cloned voices.
 - **Cost:** about 46k characters, 179 STT calls and 18 clones. The full run log is in
   [docs/runs.md](../docs/runs.md).
 
@@ -26,16 +29,13 @@ Anything less is an **observation**, reported with its measured rate.
 
 | ID | Severity | Finding | Rate | Note |
 |---|---|---|---|---|
-| **R1** | High | Barge-in can't stop speech: `cancel_request` drops only unreleased text, released audio keeps streaming, no ack. Same on stock voices (engine-wide) | every run | [realtime](2026-11-18-realtime-findings.md#r1-barge-in-cant-stop-speech-that-is-already-released), [e2e](2026-11-19-e2e-runs.md) |
+| **R1** | High | Barge-in can't stop a released reply: `cancel_request` drops only unreleased text; released segments (even ones that start generating after the cancel) stream in full, with no ack and no `context_id` on frames. Same on stock voices (engine-wide) | every run | [realtime](2026-11-18-realtime-findings.md#r1-barge-in-cant-stop-speech-that-is-already-released), [e2e](2026-11-19-e2e-runs.md) |
 | **F1** | High | A deleted or never-existing pronunciation dictionary id is accepted silently (200, dictionary not applied) | every run | [tts](2026-11-18-tts-findings.md#f1-a-deleted-or-never-existing-pronunciation-dictionary-id-is-accepted-silently) |
 | **C1** | High | No API to delete a voice clone: the documented route returns 410 `MODEL_DEPRECATED`, the clone stays and still speaks | every run | [cloning](2026-11-18-cloning-findings.md#c1-the-only-documented-way-to-delete-a-voice-clone-returns-410-model_deprecated) |
-| **R2** | Medium | The documented 1-request concurrency limit is not enforced; no 429, no rate-limit headers | every run | [realtime](2026-11-18-realtime-findings.md#r2-the-documented-concurrency-limit-didnt-trigger-at-24-concurrent-requests) |
-| **C2** | Medium | Valid WAV uploads labelled `audio/x-wav` / `audio/vnd.wave` are rejected (400 "Invalid file type.") | every run | [cloning](2026-11-18-cloning-findings.md#c2-clone-upload-rejects-valid-wav-files-based-on-the-declared-mime-type) |
-| **C5** | Medium | The "clone must match its pool, mismatch = 400" rule is not enforced | every run | [cloning](2026-11-18-cloning-findings.md#c5-the-documented-clone-must-match-its-pool-rule-is-not-enforced) |
+| **R2** | Medium | The documented 1-request TTS limit didn't trigger at up to 4 parallel requests; no 429, no rate-limit headers | every run | [realtime](2026-11-18-realtime-findings.md#r2-the-documented-concurrency-limit-didnt-trigger-at-24-concurrent-requests) |
 | **F2** | Medium | 4 voices in the Pro model card don't exist in the API | every run | [tts](2026-11-18-tts-findings.md#f2-4-voices-in-the-pro-model-card-dont-exist-in-the-api) |
-| **F3** | Medium | Smallest's own agent skill contradicts the API in 4 places | every run | [tts](2026-11-18-tts-findings.md#f3-smallests-official-agent-skill-contradicts-the-api-in-4-places) |
-| **R5** | Low | `complete` arrives ~4 s after the last audio, so "agent finished speaking" can't be detected from it. Engine-wide | every run | [reproducibility](2026-11-18-reproducibility.md), [e2e](2026-11-19-e2e-runs.md) |
-| **E1** | Low | The WebSocket ignores `output_format: "ulaw"` and silently returns PCM (REST serves ulaw) | 4/4 runs with a phone leg | [e2e](2026-11-19-e2e-runs.md#new-from-the-prototype) |
+| **F3** | Medium | Smallest's own agent skill contradicts the API in 3 places | every run | [tts](2026-11-18-tts-findings.md#f3-smallests-official-agent-skill-contradicts-the-api-in-3-places) |
+| **E1** | Medium | The WebSocket ignores the documented `output_format: "ulaw"` and silently returns 16-bit PCM (REST serves μ-law) | 4/4 e2e runs that probed it | [e2e](2026-11-19-e2e-runs.md#new-from-the-prototype) |
 | E2 | Observation | Hindi first audio ~500 ms vs ~250 ms in English; response latency over the 1.5 s budget | 2/2 Hindi runs | [e2e](2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) |
 | E3 | Observation | Clone speaking Hindi: runaway generation (128 s of audio for a 76-character sentence), garbled numbers | 1/3 Hindi runs | [e2e](2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) |
 | R6 | Observation | A WebSocket stream stalls 0.5–7 s right after its first chunks | 2/22 reliability streams; 2/42 e2e clone turns; 0/23 stock-voice turns | [realtime](2026-11-18-realtime-findings.md), [e2e](2026-11-19-e2e-runs.md) |

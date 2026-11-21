@@ -8,9 +8,9 @@
 | ID | Finding | Severity | Status |
 |---|---|---|---|
 | C1 | Clones can't be deleted through the API: the only documented delete route returns 410 `MODEL_DEPRECATED` | High | **Permanent: 4/4 runs** |
-| C2 | Clone upload rejects valid WAV files based on the declared MIME type | Medium | **Permanent: 4/4 runs** |
+| C2 | Clone upload rejects valid WAV files based on the declared MIME type | Withdrawn: matches the reference's MIME list | Reproduced 4/4 runs |
 | C3 | Pro clones add a stray sound at the start of the audio when the sample starts with silence | Observation | **Intermittent:** 2 of 4 clones affected (it depends on the clone) |
-| C5 | The documented "clone must match its pool" rule is not enforced; clones work on both models | Medium | **Permanent: 4/4 runs** |
+| C5 | The documented "clone must match its pool" rule is not enforced; clones work on both models | Withdrawn: the docs never promise a 400 for clones | Reproduced 4/4 runs |
 | C4 | Cross-lingual Pro clone sometimes returns unintelligible audio (Japanese: 2 of 9) with a 200 | Observation | **Intermittent:** 4 of 18 clips across 2 sessions |
 
 Reproduce C3 and C5: `.venv/bin/python scripts/explore_clone_languages.py` (creates 2 clones; listen to `out/clone-xlang/`) and `.venv/bin/pytest tests/cloning -v`.
@@ -77,6 +77,9 @@ Clean up by hand afterwards in the dashboard (Voice Cloning).
 
 ## C2: Clone upload rejects valid WAV files based on the declared MIME type
 
+> **Withdrawn from the report (2026-11-21).** The API reference lists the accepted MIME types (`audio/mpeg`, `audio/mpeg-3`, `audio/wav`, `audio/wave`, `audio/webm`, `video/webm`, `audio/mp4`, `video/mp4`; `api-reference__models__text-to-speech__create-voice-clone.md` line 30), and `audio/x-wav`, `audio/vnd.wave` and `application/octet-stream` aren't on it, so the rejections match the reference. What remains is a docs gap, listed in the report: the cloning guide says `.wav` is supported without the MIME rule, and the 400 doesn't name the accepted types.
+
+
 **What happens.** We sent the same 12 s WAV bytes to `POST /waves/v1/voice-cloning` five times, changing only the file part's `Content-Type`:
 
 | Declared type | Result | x-request-id |
@@ -126,6 +129,9 @@ The server decides by the declared label, not the file's contents. The docs say 
 ---
 
 ## C5: The documented "clone must match its pool" rule is not enforced
+
+> **Withdrawn from the report (2026-11-21).** The "a mismatched pair returns 400" sentence (synthesize-speech reference, line 106) is about catalog voices. For clones the reference says only that they "work with the pool they were cloned onto" (line 107), and the Pro model card says "the API does not currently reject mismatched pairings". So the docs never promise a 400 for a clone, and the 200s below aren't a defect. The disagreement between the three pages is listed in the report as a docs gap.
+
 
 **Docs:** pair a clone with the TTS model matching its `modelIds`; "a mismatched pair returns 400". The docs also warn of ~100–200 byte "empty" WAVs.
 

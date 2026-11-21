@@ -202,7 +202,8 @@ def test_03_phone_call(state, scorecard, caller_clips):
     scorecard.check(j, "response latency, median", statistics.median(lat), statistics.median(lat) <= RESPONSE_MS,
                     f"<= {RESPONSE_MS} ms", weight=2, evidence=ids)
 
-    # does the WebSocket honour output_format=ulaw (REST does, undocumented)? compare bytes with 8 kHz PCM
+    # does the WebSocket honour output_format=ulaw (documented in the streaming guide; REST honours it)?
+    # compare bytes with 8 kHz PCM
     async def native():
         sizes = {}
         async with live.live(label="e2e-phone-native") as sock:

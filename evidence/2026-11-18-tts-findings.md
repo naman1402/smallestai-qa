@@ -11,7 +11,7 @@
 |---|---|---|---|
 | F1 | A pronunciation dictionary ID that doesn't exist is silently ignored | High | **Permanent: 4/4 runs** |
 | F2 | 4 voices in the Pro model card don't exist in the API | Medium | **Permanent: 4/4 runs** |
-| F3 | Smallest's official agent skill is wrong in 4 places | Medium | **Permanent: 4/4 runs** |
+| F3 | Smallest's official agent skill is wrong in 3 places | Medium | **Permanent: 4/4 runs** |
 
 Reproduce everything: `make setup`, put the key in `.env`, then run `.venv/bin/pytest tests/tts -v`. F1 and F2 fail; F3 shows as passing tests, because those tests assert the API reference and the API agrees with the reference, not the skill.
 
@@ -74,7 +74,7 @@ Test: `tests/tts/test_voices.py::test_documented_pro_voices_exist_with_their_lan
 
 ---
 
-## F3: Smallest's official agent skill contradicts the API in 4 places
+## F3: Smallest's official agent skill contradicts the API in 3 places
 
 **Context.** `smallest-inc/skills` is what Claude Code, Codex and Cursor load to write Smallest integrations. Whatever the skill says ends up in customer code.
 
@@ -82,7 +82,6 @@ Test: `tests/tts/test_voices.py::test_documented_pro_voices_exist_with_their_lan
 |---|---|---|
 | Pro is "English, Hindi" only | Pro synthesizes Japanese (`aria`), Tamil (`malar`) and `auto` routing (Hindi text on `meher`) | `951ed057-5693-40f9-9e6e-e6c153f14f08`, `1bd2071a-ed85-48b7-a22e-c84ca9a2c44e`, `ae82baf6-7948-4aa2-946f-41bb8ec12d3b` |
 | "Always set `Accept: audio/wav`; omitting it can return an empty or unplayable response" | The same WAV comes back with and without `Accept`, as the reference says ("the server ignores it") | `dcd273c3-9520-44c6-908c-0317883b9c37` (with), `5b27bbf1-f021-473c-affe-d559a30bd4c6` (without) |
-| Mismatched voice/model pairs "are not rejected" and can return wrong audio | 400 `Voice 'magnus' is not available on the lightning_v3.1_pro model` | `69d9e14d-4ea2-4f3a-aedf-c03abe897391` |
 | `/waves/v1/lightning-v3.1/get_voices` returns the Standard and Pro catalogs combined | Pool-scoped: Standard has 240 voices and contains only 6 of the 275 Pro voices (the shared base-queue voices) | `8a6a9f21-639d-4124-9b93-6552ac121bce` (Standard), `6a2d3aef-cd53-4593-96fe-557bebece70a` (Pro) |
 
 **Why a customer cares.**
@@ -91,7 +90,9 @@ Test: `tests/tts/test_voices.py::test_documented_pro_voices_exist_with_their_lan
 - They build voice pickers from the wrong catalog.
 - The skill also defaults every example to `lightning_v3.1`, which retires 2026-11-30 (static; no request needed). Code written from it today breaks in 12 days.
 
-**Where the skill was right:** `output_format` `ulaw` and `alaw` work (200, `audio/basic`, 8 kHz G.711), but the API reference enum lists only pcm, mp3 and wav. That's a docs gap rather than a skill bug: `0f6e3db8-3a4d-493e-951c-6d8dc260b3dd`, `200ab9bb-e419-455a-a67b-99f18484dcee`.
+**Where the skill was right:** `output_format` `ulaw` and `alaw` work on REST (200, `audio/basic`, 8 kHz G.711): `0f6e3db8-3a4d-493e-951c-6d8dc260b3dd`, `200ab9bb-e419-455a-a67b-99f18484dcee`. The API reference lists them too (synthesize-speech enum, line 145), so this is not a docs gap.
+
+**Removed from F3 (2026-11-21):** the skill says mismatched voice/model pairs "are not rejected". It repeats the Pro model card's own wording, and it is about a Pro voice on `lightning_v3.1`, a direction we never tested (we sent `magnus` on Pro, which gets 400: `69d9e14d-4ea2-4f3a-aedf-c03abe897391`). So it isn't counted as a skill error.
 
 **Expected:** generate the skill from the API reference, and check the two against each other in CI.
 
@@ -100,6 +101,9 @@ Test: `tests/tts/test_voices.py::test_documented_pro_voices_exist_with_their_lan
 ---
 
 ## R5: `complete` arrives about 4 s after the last audio
+
+> **Withdrawn from the report (2026-11-21).** This is documented behaviour: `complete_backoff_ms` defaults to 4000 ms ("The time in ms to wait after the last chunk is sent before sending the complete response. Default is 4000ms", `api-reference__models__text-to-speech__tts.md` line 1032-1040). The measurements below are kept as a record and as an integration tip: set `complete_backoff_ms: 0`, or detect the end of speech by silence.
+
 Every one-shot WebSocket request sends `complete` **3988 ms** after its last audio chunk (default `complete_backoff_ms` is 4000). With `complete_backoff_ms: 0` the gap is 0.1 ms. Every doc sample waits for `complete`, so a voice agent built from them adds about 4 s per turn: `e32e77b9-41cb-4664-8cee-4b3e93b35043` vs `8c990a3a-0c5a-4687-b09b-3a079043546a`.
 
 ## Checked and working as documented

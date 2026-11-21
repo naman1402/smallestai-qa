@@ -4,7 +4,7 @@ A customer engineer's QA of Smallest's **Models API**: Lightning text-to-speech 
 plus instant voice cloning. It also includes a working prototype of a voice support agent, used to see what the
 API's behaviour means for a real product.
 
-**Result:** GO WITH WORKAROUNDS. That means 10 findings that reproduced every run, 3 of them High:
+**Result:** GO WITH WORKAROUNDS. That means 7 findings that reproduced every run, 3 of them High:
 
 - barge-in can't stop speech;
 - unknown pronunciation dictionaries are silently accepted;

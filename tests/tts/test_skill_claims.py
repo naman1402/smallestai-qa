@@ -20,8 +20,8 @@ TEXT = "The quick brown fox jumps over the lazy dog near the quiet river bank."
 
 @pytest.mark.parametrize("fmt", ["ulaw", "alaw"])
 def test_telephony_formats_the_skill_advertises(fmt):
-    """Skill: output_format pcm | mp3 | wav | ulaw | alaw. Reference enum: pcm | mp3 | wav only.
-    G.711 at 8 kHz is what phone bridges need, so either the reference hides a format or the skill invents one."""
+    """Skill and API reference both list output_format pcm | mp3 | wav | ulaw | alaw (synthesize-speech enum).
+    G.711 at 8 kHz is what phone bridges need; this checks REST actually serves it."""
     ex = tts.synthesize(tts_body(text=TEXT, output_format=fmt, sample_rate=8000), label=f"skill-{fmt}")
     if ex.status == 400:
         pytest.fail(f"skill advertises {fmt} but the API rejects it: {ex}")

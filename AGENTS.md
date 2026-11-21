@@ -71,6 +71,6 @@ skills-lock.json   every skill used, pinned by commit; restore with `npx skills 
   `x-request-id`, and assertion messages carry the request ids.
 - **For offline checks of code that logs, set `QA_EVIDENCE_DIR=/tmp`.** Fake records must never reach the real
   evidence.
-- **Upload clones as `audio/wav`** (C2).
-- **Detect end of speech by silence, not by `complete`** (R5).
+- **Upload clones as `audio/wav` or `audio/wave`.** Those are the only WAV labels on the reference's MIME list.
+- **Detect end of speech by silence, not by `complete`.** `complete_backoff_ms` defaults to 4000 ms.
 - **Don't use "phase" in code or test names.** Name a stage by what it tests.
