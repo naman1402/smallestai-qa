@@ -5,11 +5,11 @@
 - **Docs compared against:** `docs/reference/smallest-docs-2026-11-18/` (snapshot taken the same day).
 - **Skill compared against:** `.agents/skills/text-to-speech` from `smallest-inc/skills`, installed 2026-11-18.
 - **Reproducibility:** re-run 3 times at 19:00–19:20 IST; see `2026-11-18-reproducibility.md`.
-- **Severity scale:** High = silent wrong behavior in production. Medium = docs or skill steer an integration wrong. Low = an easy workaround exists (same scale as `QA_REPORT.md`).
+- **Severity scale:** the one rule in `QA_REPORT.md` (High: missing capability, or silent wrong output the client can't reliably detect or avoid. Medium: silent wrong output a cheap client-side step avoids, or docs that contradict the API. Low: a loud, clear error).
 
 | ID | Finding | Severity | Status |
 |---|---|---|---|
-| F1 | A pronunciation dictionary ID that doesn't exist is silently ignored | High | **Permanent: 4/4 runs** |
+| F1 | A pronunciation dictionary ID that doesn't exist is silently ignored | Medium | **Permanent: 4/4 runs** |
 | F2 | 4 voices in the Pro model card don't exist in the API | Medium | **Permanent: 4/4 runs** |
 | F3 | Smallest's official agent skill is wrong in 3 places | Medium | **Permanent: 4/4 runs** |
 

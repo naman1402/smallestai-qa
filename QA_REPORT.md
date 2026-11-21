@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Scope** | Lightning TTS (REST, SSE, WebSocket) and instant voice cloning: the core of any voice agent built on Smallest. Atoms is out of scope. Pulse STT was used only as a measuring tool (intelligibility checks, caller turns) and was not tested against its own docs. Its rate limit (5 × 429 after 26 calls in 36 s, no `Retry-After`, 2026-11-18 17:13 IST) slowed those measurements and wasn't investigated further |
-| **Method** | Feature conformance → realtime reliability → an end-to-end prototype (a branded voice support agent, scored go/no-go). Each stage was run once, then re-run 3 times. The prototype ran 7 scored times in 3 variations. See [docs/method.md](docs/method.md) and [docs/runs.md](docs/runs.md) |
+| **Method** | Feature conformance → realtime reliability → an end-to-end prototype (a branded voice support agent, scored go/no-go). Feature conformance and reliability were each run once, then re-run 3 times. The prototype ran 7 scored times in 3 variations. See [docs/method.md](docs/method.md) and [docs/runs.md](docs/runs.md) |
 | **Evidence** | [evidence/README.md](evidence/README.md) has the full trail for each finding: note, request ids, raw log. Times are IST (UTC+5:30), dates 2026-11-18/19 |
 
 ## Verdict
@@ -25,16 +25,20 @@ behaviour the docs describe is not reported as a defect. SLOs are a customer's p
 | ID | Sev. | Finding |
 |---|---|---|
 | [R1](#r1--high--barge-in-cant-stop-a-reply-thats-already-released) | High | Barge-in can't stop a reply that's already released |
-| [F1](#f1--high--unknown-pronunciation-dictionary-ids-are-silently-accepted) | High | Unknown pronunciation dictionary ids are silently accepted |
 | [C1](#c1--high--voice-clones-cant-be-deleted-through-the-api) | High | Voice clones can't be deleted through the API |
+| [F1](#f1--medium--unknown-pronunciation-dictionary-ids-are-silently-accepted) | Medium | Unknown pronunciation dictionary ids are silently accepted |
 | [E1](#e1--medium--the-websocket-silently-ignores-output_format-ulaw) | Medium | The WebSocket silently ignores `output_format: "ulaw"` |
 | [R2](#r2--medium--the-documented-1-request-tts-limit-didnt-trigger) | Medium | The documented 1-request TTS limit didn't trigger |
 | [F2](#f2--medium--4-voices-on-the-pro-model-card-dont-exist) | Medium | 4 voices on the Pro model card don't exist |
 | [F3](#f3--medium--smallests-agent-skill-contradicts-the-api) | Medium | Smallest's agent skill contradicts the API |
 
-Severity: **High** = silent wrong behaviour, or a required capability is missing. **Medium** = the docs are
-wrong, an integration needs extra work, or a silent failure has a cheap client-side workaround. **Low** = an
-easy workaround exists.
+Severity follows one rule, applied to every finding:
+
+- **High:** a required capability is missing, or the output is silently wrong in a way the client can't reliably
+  detect or avoid.
+- **Medium:** silently wrong output that a cheap client-side step avoids, or docs (including Smallest's own agent
+  skill) that contradict what the API does.
+- **Low:** the API fails loudly with a clear error and the fix is obvious. None of the findings is Low.
 
 Commands assume `make setup` and a key in `.env`. Cost and clone rules: [AGENTS.md](AGENTS.md#before-you-run-anything-cost-and-safety).
 
@@ -46,17 +50,17 @@ Commands assume `make setup` and a key in `.env`. Cost and clone rules: [AGENTS.
 - **Runs:** 5/5 reliability barge-in runs on 2026-11-18: 12.6, 13.9, 12.2, 12.0 and 11.5 s of audio after the cancel (recomputed from the raw logs: bytes of the cancelled context received after the cancel, 24 kHz 16-bit). 4/4 English e2e runs on a clone and on a stock voice (0.8–3.4 s), so it's engine-wide. Hindi e2e: 5.6 s in one run and 0.16 s in the other (one barge-in each).
 - **Evidence:** `7117cfcf-c16c-49e9-acc3-3ec156e3e6ae` (a segment that started 1.07 s after the cancel and streamed 6.2 s of audio, 2026-11-18 18:33 IST), `5417f71b-83bf-45da-bf31-7e4361821876` (e2e, kept streaming after the cancel, 2026-11-19 02:20 IST) · [realtime note](evidence/2026-11-18-realtime-findings.md#r1-barge-in-cant-stop-speech-that-is-already-released) · `QA_MAX_IN_FLIGHT=4 .venv/bin/pytest tests/reliability/test_agent_turns.py -k barge_in -v`
 
-### F1 · High · Unknown pronunciation dictionary ids are silently accepted
-- **Expected → observed:** an unknown dictionary id should get a 4xx (the dictionaries guide lists "Dictionary not found" as an error to troubleshoot) → a deleted or made-up id gets **200** with audio, and no dictionary is applied.
-- **Customer impact:** brand names are mispronounced after a dictionary is deleted or an id is mistyped, and nothing errors. SLO: invalid input gets a 4xx.
-- **Runs:** 4/4 sessions; 4/4 e2e runs (the dictionary-change journey).
-- **Evidence:** `d0896edc-9255-43d8-8d93-4d657a5c4295` (deleted id, 2026-11-18 16:11 IST), `bc0029dc-bc56-454e-8266-b095c3084b89` (made-up id, 16:13 IST), `b3852712-ccf4-4429-aef0-ed671c2c5297` (e2e, 2026-11-19 02:21 IST) · [tts note](evidence/2026-11-18-tts-findings.md#f1-a-deleted-or-never-existing-pronunciation-dictionary-id-is-accepted-silently) · `.venv/bin/pytest tests/tts/test_pronunciation.py -v`
-
 ### C1 · High · Voice clones can't be deleted through the API
 - **Expected → observed:** the documented delete (`DELETE /waves/v1/lightning-large`, "deletes any voice clone on your organization") should remove the clone → **410 `MODEL_DEPRECATED`**. The clone stays listed and still speaks. The API reference and SDK have no other delete, and the error points to a speech endpoint on a model that retires 2026-11-30.
 - **Customer impact:** an erasure request needs a person in the dashboard, with no API and no audit trail. SLO: deletion through the API.
 - **Runs:** 4/4 sessions; 4/4 e2e offboarding journeys. All 12 logged delete attempts returned 410.
 - **Evidence:** `e33b55f1-d11a-4ede-ad7e-5164b1831f54` (2026-11-18 17:02 IST), `bb1b2305-d297-4597-a905-67969666db5c` (e2e, 2026-11-19 02:21 IST) · [cloning note](evidence/2026-11-18-cloning-findings.md#c1-the-only-documented-way-to-delete-a-voice-clone-returns-410-model_deprecated) · `.venv/bin/pytest tests/cloning/test_lifecycle.py -v` (creates 2 clones)
+
+### F1 · Medium · Unknown pronunciation dictionary ids are silently accepted
+- **Expected → observed:** an unknown dictionary id should get a 4xx (the dictionaries guide lists "Dictionary not found" as an error to troubleshoot) → a deleted or made-up id gets **200** with audio, and no dictionary is applied.
+- **Customer impact:** brand names are mispronounced after a dictionary is deleted or an id is mistyped, and nothing errors. SLO: invalid input gets a 4xx. Why Medium: checking ids against `GET /waves/v1/pronunciation-dicts` before each call avoids it, at the cost of an extra request (the prototype did this).
+- **Runs:** 4/4 sessions; 4/4 e2e runs (the dictionary-change journey).
+- **Evidence:** `d0896edc-9255-43d8-8d93-4d657a5c4295` (deleted id, 2026-11-18 16:11 IST), `bc0029dc-bc56-454e-8266-b095c3084b89` (made-up id, 16:13 IST), `b3852712-ccf4-4429-aef0-ed671c2c5297` (e2e, 2026-11-19 02:21 IST) · [tts note](evidence/2026-11-18-tts-findings.md#f1-a-deleted-or-never-existing-pronunciation-dictionary-id-is-accepted-silently) · `.venv/bin/pytest tests/tts/test_pronunciation.py -v`
 
 ### E1 · Medium · The WebSocket silently ignores `output_format: "ulaw"`
 - **Expected → observed:** the streaming guide's parameter table for the WebSocket and SSE lists `output_format`: "`pcm`, `mp3`, `wav`, `ulaw`, or `alaw`" ([streaming.md](docs/reference/smallest-docs-2026-11-18/models__text-to-speech__streaming.md), line 373), and REST honours it: `ulaw` returns `audio/basic`, 8-bit G.711 at 8 kHz. → On the WebSocket, a `ulaw` request comes back as 16-bit PCM, with no error and no warning frame (every frame of all 4 probe sockets was logged: only `chunk` and `complete`).
@@ -89,7 +93,7 @@ These are real but intermittent, so they're reported with the measured rate.
 
 | ID | What | Rate | Evidence |
 |---|---|---|---|
-| E3 | A clone speaking Hindi ran away: 128 s of audio for a 76-character sentence, with garbled numbers | 1 of 3 Hindi runs (the one that was stopped early, unscored) | [e2e](evidence/2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) · `68519717-c779-412b-b76a-dc309d69a175` (2026-11-19 04:03 IST) |
+| E3 | A clone speaking Hindi ran away: 128 s of audio for a 76-character sentence, with garbled numbers | Seen once, in run `ec2477c6`, an earlier test version that also sent the sentence ending in "." instead of "।"; it started 192 ms after that variant. The later Hindi runs sent only the "।" variant, so the triggering input was never re-sent and no rate is claimed | [e2e](evidence/2026-11-19-e2e-runs.md#variation-c-hindi-support-agent-testse2e_hindi-1-clone-per-run) · `68519717-c779-412b-b76a-dc309d69a175` (2026-11-19 04:03 IST) |
 | E2 | Hindi first audio took about 500 ms (English about 250 ms), so response latency went over 1.5 s. Only 6 turns were measured | 2 of 2 Hindi runs | same |
 | R6 | A WebSocket stream stalls 0.5–7 s right after its first chunk | 2 of 22 WebSocket streams (reliability); 2 of 42 e2e turns on a clone; 0 of 23 on a stock voice | [realtime](evidence/2026-11-18-realtime-findings.md#r6-observation-not-reproduced-in-re-runs-a-websocket-stream-sometimes-stalls-right-after-its-first-chunks), [e2e](evidence/2026-11-19-e2e-runs.md#new-from-the-prototype) |
 | C3 | A Pro clone adds a stray opening syllable when the sample starts with silence | 2 of 4 clones | [cloning](evidence/2026-11-18-cloning-findings.md#c3-pro-clones-add-a-stray-sound-at-the-start-when-the-sample-starts-with-silence) |
@@ -133,12 +137,9 @@ All checked against the [docs snapshot](docs/reference/smallest-docs-2026-11-18/
    about 12 s of audio per interruption with nothing marking where the cut is.
 2. **C1:** ship a working, documented clone delete API. Without it, compliance-bound customers get a NO-GO,
    and the docs already promise this endpoint.
-3. **F1:** reject unknown dictionary ids with a 4xx. This is silent wrong output that customers can't detect,
-   and the API already does this lookup for voices.
+3. **F1:** reject unknown dictionary ids with a 4xx. The output is silently wrong, customers only notice by
+   listening, the workaround costs an extra request per call, and the API already does this lookup for voices.
 
 ## Security (private field)
 
-No vulnerability was found, and no probing was done (per the brief). Two findings sit near the line:
-
-- **C1:** voice biometric data can't be erased through the API.
-- **R2:** without enforced limits or limit headers, there's a cost and abuse exposure (not probed).
+Submitted separately in the private security field, as the brief asks.
