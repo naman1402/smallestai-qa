@@ -4,6 +4,7 @@
 |---|---|
 | **Scope** | Lightning TTS (REST, SSE, WebSocket) and instant voice cloning: the core of any voice agent built on Smallest. Atoms is out of scope. Pulse STT was used only as a measuring tool (intelligibility checks, caller turns) and was not tested against its own docs. Its rate limit (5 × 429 after 26 calls in 36 s, no `Retry-After`, 2026-11-18 17:13 IST) slowed those measurements and wasn't investigated further |
 | **Method** | Feature conformance → realtime reliability → an end-to-end prototype (a branded voice support agent, scored go/no-go). Feature conformance and reliability were each run once, then re-run 3 times. The prototype ran 7 scored times in 3 variations. See [docs/method.md](docs/method.md) and [docs/runs.md](docs/runs.md) |
+| **Time spent** | About 6 hours of focused work |
 | **Evidence** | [evidence/README.md](evidence/README.md) has the full trail for each finding: note, request ids, raw log. Times are IST (UTC+5:30), dates 2026-11-18/19 |
 
 ## Verdict
